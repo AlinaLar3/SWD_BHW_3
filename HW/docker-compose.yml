@@ -1,0 +1,89 @@
+networks:
+  app-tier:
+    driver: bridge
+
+volumes:
+  pgdata:
+  kafka_data:
+
+services:
+  db:
+    image: postgres:15
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./InitDatabase.sql:/docker-entrypoint-initdb.d/InitDatabase.sql
+    ports:
+      - "5432:5432"
+    networks:
+      - app-tier
+
+  pgadmin:
+    image: dpage/pgadmin4
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@example.com
+      PGADMIN_DEFAULT_PASSWORD: adminpassword
+    ports:
+      - "8000:80"
+    depends_on:
+      - db
+    networks:
+      - app-tier
+
+  apigate:
+    restart: always
+    build:
+      context: .
+      dockerfile: ApiGateway/Dockerfile
+    ports:
+      - "5000:80"
+    environment:
+      - ASPNETCORE_URLS=http://+:80
+    depends_on:
+      - orderservice
+      - paymentservice
+    networks:
+      - app-tier
+
+  orderservice:
+    restart: always
+    build:
+      context: .
+      dockerfile: OrderService/Dockerfile
+    ports:
+      - "5001:80"
+    environment:
+      - ASPNETCORE_URLS=http://+:80
+    depends_on:
+      - db
+    networks:
+      - app-tier
+
+  paymentservice:
+    restart: always
+    build:
+      context: .
+      dockerfile: PaymentService/Dockerfile
+    ports:
+      - "5002:80"
+    environment:
+      - ASPNETCORE_URLS=http://+:80
+    depends_on:
+      - db
+    networks:
+      - app-tier
+
+  ui:
+    build:
+      context: ./UI
+      dockerfile: Dockerfile
+    ports:
+      - "3000:80"
+    depends_on:
+      - apigate
+    networks:
+      - app-tier
