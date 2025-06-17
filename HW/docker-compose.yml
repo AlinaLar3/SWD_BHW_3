@@ -76,14 +76,3 @@ services:
       - db
     networks:
       - app-tier
-
-  ui:
-    build:
-      context: ./UI
-      dockerfile: Dockerfile
-    ports:
-      - "3000:80"
-    depends_on:
-      - apigate
-    networks:
-      - app-tier
