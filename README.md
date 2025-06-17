@@ -57,5 +57,10 @@
     docker-compose up --build -d
 
 ### Порты:
+<<<<<<< HEAD
     *   Доступ к Swagger: `localhost:5000/swagger`
     *   Панель управления Kafka: `localhost:8080`
+=======
+    *   Доступ к Swagger: localhost:5000/swagger
+    *   Панель управления Kafka: localhost:8080
+>>>>>>> d654c5294504c893e2f29cc59932344aa4ace17a
